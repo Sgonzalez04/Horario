@@ -61,6 +61,13 @@ function load_horarios() {
             `<b>Jueves:</b> Inicio: ${horario[x].jueves.inicio} - Fin: ${horario[x].jueves.fin}<br>` +
             `<b>Viernes:</b> Inicio: ${horario[x].viernes.inicio} - Fin: ${horario[x].viernes.fin}<br>`;
 
+        // Crea un botón de "Editar" para permitir la edición del horario.
+        let editButton = document.createElement("button");
+        editButton.textContent = "Editar";
+        editButton.onclick = function() {
+            edit_horario(x);
+        };
+
         // Crea un botón de "Eliminar" para permitir la eliminación de la persona del horario.
         let deleteButton = document.createElement("button");
         deleteButton.textContent = "Eliminar";
@@ -68,13 +75,90 @@ function load_horarios() {
             delete_horario(this);
         };
 
-        // Agrega el elemento <p> que muestra la información y el botón "Eliminar" al <div>.
+        // Agrega el elemento <p> que muestra la información y los botones "Editar" y "Eliminar" al <div>.
         div_horario.appendChild(p);
+        div_horario.appendChild(editButton);
         div_horario.appendChild(deleteButton);
 
-        // Agrega el <div> que contiene la información y el botón al contenedor general.
+        // Agrega el <div> que contiene la información y los botones al contenedor general.
         container.appendChild(div_horario);
     }
+}
+
+// Función para editar un horario existente
+function edit_horario(index) {
+    // Obtener el horario que se va a editar
+    let horarioToEdit = horario[index];
+
+    // Llenar los campos de entrada con la información del horario existente
+    document.getElementById("nombre").value = horarioToEdit.nombre;
+    document.getElementById("lunes-inicio").value = horarioToEdit.lunes.inicio;
+    document.getElementById("lunes-fin").value = horarioToEdit.lunes.fin;
+    document.getElementById("martes-inicio").value = horarioToEdit.martes.inicio;
+    document.getElementById("martes-fin").value = horarioToEdit.martes.fin;
+    document.getElementById("miercoles-inicio").value = horarioToEdit.miercoles.inicio;
+    document.getElementById("miercoles-fin").value = horarioToEdit.miercoles.fin;
+    document.getElementById("jueves-inicio").value = horarioToEdit.jueves.inicio;
+    document.getElementById("jueves-fin").value = horarioToEdit.jueves.fin;
+    document.getElementById("viernes-inicio").value = horarioToEdit.viernes.inicio;
+    document.getElementById("viernes-fin").value = horarioToEdit.viernes.fin;
+
+    // Eliminar el horario original
+    horario.splice(index, 1);
+    localStorage.setItem("horarios_campus", JSON.stringify(horario));
+    load_horarios(); // Actualizar la lista de horarios después de la edición.
+
+    // Cambiar la función del botón "Agregar" para que guarde los cambios
+    let addButton = document.querySelector("button[onclick='add_horario()']");
+    addButton.textContent = "Guardar Cambios";
+    addButton.onclick = function () {
+        save_changes(index);
+    };
+}
+
+// Función para guardar los cambios en un horario editado
+function save_changes(index) {
+    // Crear un nuevo objeto de horario con los datos editados
+    let persona = {
+        nombre: document.getElementById("nombre").value,
+        lunes: {
+            inicio: document.getElementById("lunes-inicio").value,
+            fin: document.getElementById("lunes-fin").value
+        },
+        martes: {
+            inicio: document.getElementById("martes-inicio").value,
+            fin: document.getElementById("martes-fin").value
+        },
+        miercoles: {
+            inicio: document.getElementById("miercoles-inicio").value,
+            fin: document.getElementById("miercoles-fin").value
+        },
+        jueves: {
+            inicio: document.getElementById("jueves-inicio").value,
+            fin: document.getElementById("jueves-fin").value
+        },
+        viernes: {
+            inicio: document.getElementById("viernes-inicio").value,
+            fin: document.getElementById("viernes-fin").value
+        }
+    };
+
+    // Validación para campos vacíos
+    if (persona.nombre === "" || persona.lunes.inicio === "" || persona.lunes.fin === "") {
+        alert("Por favor, complete todos los campos obligatorios.");
+        return; // Evita agregar si hay campos vacíos.
+    }
+
+    // Insertar el horario editado en la posición original
+    horario.splice(index, 0, persona);
+    localStorage.setItem("horarios_campus", JSON.stringify(horario));
+    load_horarios(); // Actualizar la lista de horarios después de la edición.
+    clearFields(); // Limpia los campos después de guardar los cambios.
+
+    // Restaurar la función del botón "Agregar" para agregar nuevos horarios
+    let addButton = document.querySelector("button[onclick='save_changes()']");
+    addButton.textContent = "Agregar";
+    addButton.onclick = add_horario;
 }
 
 // Función para eliminar un horario
